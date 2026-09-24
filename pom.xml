@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.fillumina</groupId>
+  <artifactId>xjc-plugins-example</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+  <name>xjc-plugins-example</name>
+
+  <description>
+    The three plugins of the new line working together in one build: cxf-validation-frontend adds
+    @Valid to the generated service interface, xjc-bean-validation-plugin writes the constraints the
+    schema states, and xjc-primitives-plugin boxes the primitive fields so a constraint can be put
+    on them. One WSDL, one build, the three artifacts where the krasa-jaxb-tools plugin used to be.
+  </description>
+
+  <url>https://github.com/fillumina/xjc-plugins-example/</url>
+
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.release>21</maven.compiler.release>
+    <cxf.version>4.2.3</cxf.version>
+    <hibernate-validator.version>9.1.4.Final</hibernate-validator.version>
+    <junit.version>6.1.3</junit.version>
+    <!-- the versions of the artifacts this example exercises: a release, or a snapshot after
+         'mvn install' in each project -->
+    <cxf-validation-frontend.version>1.0.0-SNAPSHOT</cxf-validation-frontend.version>
+    <xjc-bean-validation-plugin.version>1.0.0-SNAPSHOT</xjc-bean-validation-plugin.version>
+    <xjc-primitives-plugin.version>1.0.0-SNAPSHOT</xjc-primitives-plugin.version>
+  </properties>
+
+  <dependencies>
+    <!-- the generated classes and the generated interface need these to compile -->
+    <dependency>
+      <groupId>jakarta.validation</groupId>
+      <artifactId>jakarta.validation-api</artifactId>
+      <version>3.1.1</version>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.xml.bind</groupId>
+      <artifactId>jakarta.xml.bind-api</artifactId>
+      <version>4.0.5</version>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.jws</groupId>
+      <artifactId>jakarta.jws-api</artifactId>
+      <version>3.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.xml.ws</groupId>
+      <artifactId>jakarta.xml.ws-api</artifactId>
+      <version>4.0.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.hibernate.validator</groupId>
+      <artifactId>hibernate-validator</artifactId>
+      <version>${hibernate-validator.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.expressly</groupId>
+      <artifactId>expressly</artifactId>
+      <version>6.0.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-launcher</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>3.6.0</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.16.0</version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>3.6.3</version>
+        <executions>
+          <execution>
+            <id>enforce-versions</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireJavaVersion>
+                  <version>[21,)</version>
+                </requireJavaVersion>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!--
+        The whole point of the example: the three artifacts are dependencies of the codegen plugin,
+        and each is selected the way its own README documents. Where the krasa-jaxb-tools plugin was
+        one artifact doing all of it, here there are three.
+      -->
+      <plugin>
+        <groupId>org.apache.cxf</groupId>
+        <artifactId>cxf-codegen-plugin</artifactId>
+        <version>${cxf.version}</version>
+        <executions>
+          <execution>
+            <id>wsdl2java</id>
+            <phase>generate-sources</phase>
+            <configuration>
+              <wsdlOptions>
+                <wsdlOption>
+                  <wsdl>${project.basedir}/wsdl/Order.wsdl</wsdl>
+                  <extraargs>
+                    <!-- the frontend: @Valid on the generated service interface -->
+                    <extraarg>-frontend</extraarg>
+                    <extraarg>bean-validation</extraarg>
+                    <extraarg>-xjc-XCxfValidationFrontendOptions:generateAnnotations=inOut</extraarg>
+                    <!-- the constraints the schema states -->
+                    <extraarg>-xjc-XBeanValidationAnnotations</extraarg>
+                    <extraarg>-xjc-XBeanValidationAnnotations:omitJavaTypeBounds=true</extraarg>
+                    <!-- the boxed primitives, so a constraint can be put on them -->
+                    <extraarg>-xjc-XReplacePrimitives</extraarg>
+                  </extraargs>
+                </wsdlOption>
+              </wsdlOptions>
+            </configuration>
+            <goals>
+              <goal>wsdl2java</goal>
+            </goals>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>com.fillumina</groupId>
+            <artifactId>cxf-validation-frontend</artifactId>
+            <version>${cxf-validation-frontend.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>com.fillumina</groupId>
+            <artifactId>xjc-bean-validation-plugin</artifactId>
+            <version>${xjc-bean-validation-plugin.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>com.fillumina</groupId>
+            <artifactId>xjc-primitives-plugin</artifactId>
+            <version>${xjc-primitives-plugin.version}</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+    </plugins>
+  </build>
+</project>

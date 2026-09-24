@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:tns="http://example.com/order"
+             targetNamespace="http://example.com/order">
+
+    <types>
+        <schema xmlns="http://www.w3.org/2001/XMLSchema"
+                targetNamespace="http://example.com/order"
+                elementFormDefault="qualified">
+
+            <element name="OrderRequest" type="tns:OrderRequestType"/>
+            <element name="OrderResponse" type="tns:OrderResponseType"/>
+
+            <complexType name="OrderRequestType">
+                <sequence>
+                    <element name="code" type="tns:codeType"/>
+                    <element name="quantity" type="int"/>
+                    <element name="express" type="boolean"/>
+                    <element name="customer" type="tns:customerType"/>
+                    <element name="note" type="tns:noteType" minOccurs="0"/>
+                </sequence>
+            </complexType>
+
+            <complexType name="OrderResponseType">
+                <sequence>
+                    <element name="accepted" type="boolean"/>
+                    <element name="reference" type="tns:codeType"/>
+                </sequence>
+            </complexType>
+
+            <complexType name="customerType">
+                <sequence>
+                    <element name="name" type="tns:noteType"/>
+                    <element name="email" type="tns:emailType"/>
+                </sequence>
+            </complexType>
+
+            <simpleType name="codeType">
+                <restriction base="string">
+                    <pattern value="[A-Z]{2}[0-9]{5}"/>
+                </restriction>
+            </simpleType>
+
+            <simpleType name="noteType">
+                <restriction base="string">
+                    <maxLength value="200"/>
+                </restriction>
+            </simpleType>
+
+            <simpleType name="emailType">
+                <restriction base="string">
+                    <pattern value="[^@]+@[^@]+\.[a-z]{2,}"/>
+                </restriction>
+            </simpleType>
+
+        </schema>
+    </types>
+
+    <message name="OrderRequestMessage">
+        <part name="parameters" element="tns:OrderRequest"/>
+    </message>
+    <message name="OrderResponseMessage">
+        <part name="parameters" element="tns:OrderResponse"/>
+    </message>
+
+    <portType name="OrderServicePortType">
+        <operation name="PlaceOrder">
+            <input message="tns:OrderRequestMessage"/>
+            <output message="tns:OrderResponseMessage"/>
+        </operation>
+    </portType>
+
+    <binding name="OrderServiceSoapBinding" type="tns:OrderServicePortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="PlaceOrder">
+            <soap:operation soapAction="http://example.com/order/PlaceOrder"/>
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+        </operation>
+    </binding>
+
+    <service name="OrderService">
+        <port name="OrderServicePort" binding="tns:OrderServiceSoapBinding">
+            <soap:address location="http://example.com/order/service"/>
+        </port>
+    </service>
+
+</definitions>
