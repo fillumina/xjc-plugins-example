@@ -148,7 +148,7 @@
                     <!-- the frontend: @Valid on the generated service interface -->
                     <extraarg>-frontend</extraarg>
                     <extraarg>bean-validation</extraarg>
-                    <extraarg>-xjc-XCxfValidationFrontendOptions:generateAnnotations=inOut</extraarg>
+                    <extraarg>-xjc-XCxfValidationFrontendOptions:generateAnnotations=both</extraarg>
                     <!-- the constraints the schema states -->
                     <extraarg>-xjc-XBeanValidationAnnotations</extraarg>
                     <extraarg>-xjc-XBeanValidationAnnotations:omitJavaTypeBounds=true</extraarg>

@@ -34,7 +34,7 @@ artifacts, and this build is where they stand in for it:
             <extraargs>
               <extraarg>-frontend</extraarg>
               <extraarg>bean-validation</extraarg>
-              <extraarg>-xjc-XCxfValidationFrontendOptions:generateAnnotations=inOut</extraarg>
+              <extraarg>-xjc-XCxfValidationFrontendOptions:generateAnnotations=both</extraarg>
               <extraarg>-xjc-XBeanValidationAnnotations</extraarg>
               <extraarg>-xjc-XBeanValidationAnnotations:omitJavaTypeBounds=true</extraarg>
               <extraarg>-xjc-XReplacePrimitives</extraarg>
