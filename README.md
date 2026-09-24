@@ -76,7 +76,7 @@ option name, so two plugins sharing one would mean one of them silently never ru
 `TheThreePluginsWorkTogetherTest` reads the result of that one build, from the compiled classes:
 
 1. the constraints of the schema are on the generated types — `@Pattern` on `code`, `@Size(max = 200)` on `note`, `@NotNull` and `@Valid` on the nested `customer`;
-2. the primitive fields are boxed — `quantity` is an `Integer` and `express` is a `Boolean`, so `@NotNull` on them can mean something;
+2. the primitive fields are boxed — `quantity` is an `Integer` and `express` is a `Boolean`, so `@NotNull` on them can mean something. The compiled `express` property remains readable through JavaBeans introspection, and a JAXB marshal/unmarshal round trip preserves it with field access;
 3. the generated service interface carries `@Valid`, on the method and on its parameter;
 4. Hibernate Validator reports an order that breaks the schema — a malformed code and a malformed email — so the annotations are live, not just written.
 

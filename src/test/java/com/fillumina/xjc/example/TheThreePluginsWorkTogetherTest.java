@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.example.order.CustomerType;
+import com.example.order.ObjectFactory;
 import com.example.order.OrderRequestType;
 import com.example.order.OrderServicePortType;
 import jakarta.validation.ConstraintViolation;
@@ -14,6 +15,13 @@ import jakarta.validation.Validator;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import java.beans.Introspector;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -48,6 +56,35 @@ class TheThreePluginsWorkTogetherTest {
     void thePrimitiveFieldsAreBoxed() throws Exception {
         assertEquals(Integer.class, OrderRequestType.class.getDeclaredField("quantity").getType());
         assertEquals(Boolean.class, OrderRequestType.class.getDeclaredField("express").getType());
+    }
+
+    @Test
+    void theBoxedBooleanIsAReadableBeanPropertyWithoutChangingJaxbFieldBinding() throws Exception {
+        assertEquals(XmlAccessType.FIELD,
+                OrderRequestType.class.getAnnotation(XmlAccessorType.class).value());
+        var express = java.util.Arrays.stream(Introspector.getBeanInfo(OrderRequestType.class)
+                        .getPropertyDescriptors())
+                .filter(property -> property.getName().equals("express"))
+                .findFirst().orElseThrow();
+        assertNotNull(express.getReadMethod());
+        assertNotNull(express.getWriteMethod());
+        assertEquals(Boolean.class, express.getPropertyType());
+        assertEquals("getExpress", express.getReadMethod().getName());
+
+        OrderRequestType order = validOrder();
+        assertEquals(Boolean.FALSE, express.getReadMethod().invoke(order));
+        order.setExpress(true);
+        assertEquals(Boolean.TRUE, express.getReadMethod().invoke(order));
+        assertEquals(Boolean.TRUE, order.isExpress());
+
+        JAXBContext context = JAXBContext.newInstance(ObjectFactory.class);
+        StringWriter xml = new StringWriter();
+        context.createMarshaller().marshal(new ObjectFactory().createOrderRequest(order), xml);
+        Object decoded = context.createUnmarshaller().unmarshal(new StringReader(xml.toString()));
+        assertTrue(decoded instanceof JAXBElement<?>);
+        OrderRequestType restored = (OrderRequestType) ((JAXBElement<?>) decoded).getValue();
+        assertEquals(Boolean.TRUE, restored.isExpress());
+        assertEquals(Boolean.TRUE, express.getReadMethod().invoke(restored));
     }
 
     @Test
