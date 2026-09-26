@@ -43,7 +43,7 @@ jobs:
         echo "primitives=$(mvn -B -q help:evaluate -Dexpression=project.version -DforceStdout --file xjc-primitives-plugin/pom.xml)" >> "$GITHUB_OUTPUT"
 
     - name: Test the three plugins in both XJC orders
-      run: mvn -B clean verify -pl three-plugins -am --file pom.xml -Dcxf-validation-frontend.version=${ steps.plugins.outputs.cxf } -Dxjc-bean-validation-plugin.version=${ steps.plugins.outputs.bean } -Dxjc-primitives-plugin.version=${ steps.plugins.outputs.primitives }
+      run: mvn -B clean verify -pl three-plugins -am --file pom.xml -Dcxf-validation-frontend.version=${{ steps.plugins.outputs.cxf }} -Dxjc-bean-validation-plugin.version=${{ steps.plugins.outputs.bean }} -Dxjc-primitives-plugin.version=${{ steps.plugins.outputs.primitives }}
 
     - name: Test primitives before equals and hashCode
-      run: mvn -B clean verify -pl equals-hashcode -am --file pom.xml -Dcxf-validation-frontend.version=${ steps.plugins.outputs.cxf } -Dxjc-bean-validation-plugin.version=${ steps.plugins.outputs.bean } -Dxjc-primitives-plugin.version=${ steps.plugins.outputs.primitives }
+      run: mvn -B clean verify -pl equals-hashcode -am --file pom.xml -Dcxf-validation-frontend.version=${{ steps.plugins.outputs.cxf }} -Dxjc-bean-validation-plugin.version=${{ steps.plugins.outputs.bean }} -Dxjc-primitives-plugin.version=${{ steps.plugins.outputs.primitives }}
