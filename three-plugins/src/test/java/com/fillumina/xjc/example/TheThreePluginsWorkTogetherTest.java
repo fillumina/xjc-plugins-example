@@ -1,5 +1,6 @@
 package com.fillumina.xjc.example;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -56,6 +57,8 @@ class TheThreePluginsWorkTogetherTest {
     void thePrimitiveFieldsAreBoxed() throws Exception {
         assertEquals(Integer.class, OrderRequestType.class.getDeclaredField("quantity").getType());
         assertEquals(Boolean.class, OrderRequestType.class.getDeclaredField("express").getType());
+        assertNotNull(annotation("quantity", NotNull.class));
+        assertNotNull(annotation("express", NotNull.class));
     }
 
     @Test
@@ -95,6 +98,36 @@ class TheThreePluginsWorkTogetherTest {
         assertNotNull(placeOrder.getAnnotation(Valid.class), "the method carries @Valid");
         assertTrue(hasValid(placeOrder.getParameterAnnotations()[0]),
                 "the parameter carries @Valid");
+    }
+
+    @Test
+    void reversingTheTwoXjcOptionsKeepsTheGeneratedContracts() throws Exception {
+        // The second CXF run has a distinct package so both generated models compile in this build.
+        Class<?> reversed = Class.forName("com.example.order.reversed.OrderRequestType");
+        Class<?> reversedService = Class.forName("com.example.order.reversed.OrderServicePortType");
+        compareFields(OrderRequestType.class, reversed,
+                List.of("code", "quantity", "express", "customer", "note"));
+        compareFields(CustomerType.class, Class.forName("com.example.order.reversed.CustomerType"),
+                List.of("name", "email"));
+        compareFields(com.example.order.OrderResponseType.class,
+                Class.forName("com.example.order.reversed.OrderResponseType"),
+                List.of("accepted", "reference"));
+        assertEquals(OrderRequestType.class.getMethod("getExpress").getReturnType(),
+                reversed.getMethod("getExpress").getReturnType());
+        assertNotNull(reversedService.getMethod("placeOrder", reversed).getAnnotation(Valid.class));
+        assertTrue(hasValid(reversedService.getMethod("placeOrder", reversed).getParameterAnnotations()[0]));
+    }
+
+    private static void compareFields(Class<?> first, Class<?> second, List<String> names)
+            throws NoSuchFieldException {
+        for (String name : names) {
+            var expected = first.getDeclaredField(name);
+            var actual = second.getDeclaredField(name);
+            assertEquals(expected.getType().getSimpleName(), actual.getType().getSimpleName(), name);
+            assertArrayEquals(expected.getAnnotations(), actual.getAnnotations(), name);
+            assertArrayEquals(expected.getAnnotatedType().getAnnotations(),
+                    actual.getAnnotatedType().getAnnotations(), name + " type annotations");
+        }
     }
 
     @Test
