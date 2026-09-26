@@ -1,5 +1,10 @@
 # xjc-plugins-example
 
+[![Maven Central: cxf-validation-frontend](https://img.shields.io/maven-central/v/com.fillumina/cxf-validation-frontend.svg)](https://central.sonatype.com/artifact/com.fillumina/cxf-validation-frontend) [![Maven Central: xjc-bean-validation-plugin](https://img.shields.io/maven-central/v/com.fillumina/xjc-bean-validation-plugin.svg)](https://central.sonatype.com/artifact/com.fillumina/xjc-bean-validation-plugin) [![Maven Central: xjc-primitives-plugin](https://img.shields.io/maven-central/v/com.fillumina/xjc-primitives-plugin.svg)](https://central.sonatype.com/artifact/com.fillumina/xjc-primitives-plugin)
+
+The three badges are the releases of the three plugins this reactor pins, the ones a build
+resolves from Central.
+
 This Maven reactor contains two consumer examples. `three-plugins` generates one WSDL with
 [`cxf-validation-frontend`](https://github.com/fillumina/cxf-validation-frontend),
 [`xjc-bean-validation-plugin`](https://github.com/fillumina/xjc-bean-validation-plugin) and
