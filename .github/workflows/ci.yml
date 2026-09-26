@@ -1,6 +1,7 @@
-# Tests both consumer combinations separately on push, pull request, nightly and on demand.
-# Snapshot builds come from the latest commits of the three plugins; Maven resolves the XJC 4
-# equals/hashCode plugin from Central.
+# Tests both consumer combinations separately on push, pull request, nightly and on demand. The
+# three plugins are built from their latest commits and the example is told which version each of
+# them carries, so a run tests the current sources and not the release the poms pin. Maven resolves
+# the XJC 4 equals/hashCode plugin from Central.
 
 name: CI
 
@@ -29,6 +30,7 @@ jobs:
         distribution: 'temurin'
 
     - name: Install the three plugins from their latest commits
+      id: plugins
       run: |
         git clone --depth 1 https://github.com/fillumina/cxf-validation-frontend
         git clone --depth 1 https://github.com/fillumina/xjc-bean-validation-plugin
@@ -36,9 +38,12 @@ jobs:
         mvn -B -DskipTests install --file cxf-validation-frontend/pom.xml
         mvn -B -DskipTests install --file xjc-bean-validation-plugin/pom.xml
         mvn -B -DskipTests install --file xjc-primitives-plugin/pom.xml
+        echo "cxf=$(mvn -B -q help:evaluate -Dexpression=project.version -DforceStdout --file cxf-validation-frontend/pom.xml)" >> "$GITHUB_OUTPUT"
+        echo "bean=$(mvn -B -q help:evaluate -Dexpression=project.version -DforceStdout --file xjc-bean-validation-plugin/pom.xml)" >> "$GITHUB_OUTPUT"
+        echo "primitives=$(mvn -B -q help:evaluate -Dexpression=project.version -DforceStdout --file xjc-primitives-plugin/pom.xml)" >> "$GITHUB_OUTPUT"
 
     - name: Test the three plugins in both XJC orders
-      run: mvn -B clean verify -pl three-plugins -am --file pom.xml
+      run: mvn -B clean verify -pl three-plugins -am --file pom.xml -Dcxf-validation-frontend.version=${ steps.plugins.outputs.cxf } -Dxjc-bean-validation-plugin.version=${ steps.plugins.outputs.bean } -Dxjc-primitives-plugin.version=${ steps.plugins.outputs.primitives }
 
     - name: Test primitives before equals and hashCode
-      run: mvn -B clean verify -pl equals-hashcode -am --file pom.xml
+      run: mvn -B clean verify -pl equals-hashcode -am --file pom.xml -Dcxf-validation-frontend.version=${ steps.plugins.outputs.cxf } -Dxjc-bean-validation-plugin.version=${ steps.plugins.outputs.bean } -Dxjc-primitives-plugin.version=${ steps.plugins.outputs.primitives }
