@@ -1,7 +1,6 @@
-# Runs the example on every push and pull request, and once a night against the latest commit of
-# each of the three projects it imports. None of them is released yet, so their snapshots exist
-# nowhere else, and what this example has to prove is that the current sources of the three work
-# together inside one build.
+# Tests both consumer combinations separately on push, pull request, nightly and on demand.
+# Snapshot builds come from the latest commits of the three plugins; Maven resolves the XJC 4
+# equals/hashCode plugin from Central.
 
 name: CI
 
@@ -38,5 +37,8 @@ jobs:
         mvn -B -DskipTests install --file xjc-bean-validation-plugin/pom.xml
         mvn -B -DskipTests install --file xjc-primitives-plugin/pom.xml
 
-    - name: Build and test the example
-      run: mvn -B verify --file pom.xml
+    - name: Test the three plugins in both XJC orders
+      run: mvn -B clean verify -pl three-plugins -am --file pom.xml
+
+    - name: Test primitives before equals and hashCode
+      run: mvn -B clean verify -pl equals-hashcode -am --file pom.xml
