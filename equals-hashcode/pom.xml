@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.fillumina</groupId>
+    <artifactId>xjc-plugins-example</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+  </parent>
+  <artifactId>equals-hashcode-example</artifactId>
+  <name>Primitive replacement with equals and hashCode</name>
+
+  <description>
+    Integration example for primitive replacement before equals and hashCode generation in XJC 4.
+  </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>jakarta.xml.bind</groupId>
+      <artifactId>jakarta.xml.bind-api</artifactId>
+      <version>4.0.5</version>
+    </dependency>
+    <!-- The generated strategy-based equals/hashCode methods call this library at runtime. -->
+    <dependency>
+      <groupId>org.jvnet.jaxb</groupId>
+      <artifactId>jaxb-plugins-runtime</artifactId>
+      <version>${jaxb.plugins.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-launcher</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>3.6.3</version>
+        <executions>
+          <execution>
+            <id>enforce-versions</id>
+            <goals><goal>enforce</goal></goals>
+            <configuration>
+              <rules><requireJavaVersion><version>[21,)</version></requireJavaVersion></rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.jvnet.jaxb</groupId>
+        <artifactId>jaxb-maven-plugin</artifactId>
+        <version>${jaxb.version}</version>
+        <executions>
+          <execution>
+            <goals><goal>generate</goal></goals>
+          </execution>
+        </executions>
+        <configuration>
+          <extension>true</extension>
+          <schemaDirectory>${project.basedir}/src/main/xsd</schemaDirectory>
+          <args>
+            <arg>-p</arg>
+            <arg>com.example.equals</arg>
+            <!-- Property types must be boxed before equals/hashCode methods capture them. -->
+            <arg>-XReplacePrimitives</arg>
+            <arg>-Xequals</arg>
+            <arg>-XhashCode</arg>
+          </args>
+          <plugins>
+            <plugin>
+              <groupId>com.fillumina</groupId>
+              <artifactId>xjc-primitives-plugin</artifactId>
+              <version>${xjc-primitives-plugin.version}</version>
+            </plugin>
+            <plugin>
+              <groupId>org.jvnet.jaxb</groupId>
+              <artifactId>jaxb-plugins</artifactId>
+              <version>${jaxb.plugins.version}</version>
+            </plugin>
+          </plugins>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
