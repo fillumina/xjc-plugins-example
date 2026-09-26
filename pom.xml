@@ -34,9 +34,9 @@
     <hibernate-validator.version>9.1.4.Final</hibernate-validator.version>
     <junit.version>6.1.3</junit.version>
     <!-- Each version can be overridden to test a release or a locally installed snapshot. -->
-    <cxf-validation-frontend.version>1.0.0-SNAPSHOT</cxf-validation-frontend.version>
-    <xjc-bean-validation-plugin.version>1.0.0-SNAPSHOT</xjc-bean-validation-plugin.version>
-    <xjc-primitives-plugin.version>1.0.0-SNAPSHOT</xjc-primitives-plugin.version>
+    <cxf-validation-frontend.version>1.0.0</cxf-validation-frontend.version>
+    <xjc-bean-validation-plugin.version>1.0.0</xjc-bean-validation-plugin.version>
+    <xjc-primitives-plugin.version>1.0.0</xjc-primitives-plugin.version>
   </properties>
 
   <build>
